@@ -103,4 +103,12 @@ namespace dae
 		}
 
 	}
+	void Mesh::UpdateWorldViewProjectionMatrix(const Matrix& newMatrix) const
+	{
+		// TODO ; don't forget mesh personal matrix (for translate/rotate)
+
+		
+
+		m_pEffect->UpdateWorldViewProjectionMatrix(reinterpret_cast<const float*>(&newMatrix));
+	}
 }

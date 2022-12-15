@@ -10,6 +10,9 @@ namespace dae {
 		//Initialize
 		SDL_GetWindowSize(pWindow, &m_Width, &m_Height);
 
+		m_AspectRatio = m_Width / static_cast<float>(m_Height);
+
+
 		//Initialize DirectX pipeline
 		const HRESULT result = InitializeDirectX();
 		if (result == S_OK)
@@ -22,11 +25,24 @@ namespace dae {
 			std::cout << "DirectX initialization failed!\n";
 		}
 
+
+		m_Camera.Initialize(45.f, { 0.0f, 0.0f, -10.0f }, m_AspectRatio);
+
+
+
 		//Create some data for our mesh
+		// pos in NDC
+		//std::vector<Vertex> vertices{
+		//	{{0.0f, 0.5f, 0.5f},	{1.f, 0.f, 0.f}},
+		//	{{0.5f, -0.5f, 0.5f},	{0.f, 0.f, 1.f}},
+		//	{{-0.5f, -0.5f, 0.5f},	{0.f, 1.f, 0.f}},
+		//};
+		
+		// pos in WORLD
 		std::vector<Vertex> vertices{
-			{{0.0f, 0.5f, 0.5f},	{1.f, 0.f, 0.f}},
-			{{0.5f, -0.5f, 0.5f},	{0.f, 0.f, 1.f}},
-			{{-0.5f, -0.5f, 0.5f},	{0.f, 1.f, 0.f}},
+			{{0.0f, 3.f, 2.f},	{1.f, 0.f, 0.f}},
+			{{3.f, -3.f, 2.f},	{0.f, 0.f, 1.f}},
+			{{-3.f, -3.f, 2.f},	{0.f, 1.f, 0.f}},
 		};
 
 		std::vector<uint32_t> indices{ 0,1,2 };
@@ -56,7 +72,8 @@ namespace dae {
 
 	void Renderer::Update(const Timer* pTimer)
 	{
-
+		m_Camera.Update(pTimer);
+		m_pMesh->UpdateWorldViewProjectionMatrix(m_Camera.GetViewMatrix() * m_Camera.GetProjectionMatrix());
 	}
 
 

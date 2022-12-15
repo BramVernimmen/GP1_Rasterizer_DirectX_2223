@@ -9,10 +9,17 @@ namespace dae
 		m_pTechnique = m_pEffect->GetTechniqueByName("DefaultTechnique");
 		if (!m_pTechnique->IsValid())
 			std::wcout << L"Technique not valid\n";
+
+
+		m_pMatWorldViewProjVariable = m_pEffect->GetVariableByName("gWorldViewProj")->AsMatrix();
+		if(!m_pMatWorldViewProjVariable->IsValid())
+			std::wcout << L"m_pMatWorldViewProjVariable not valid\n";
+
 	}
 
 	Effect::~Effect()
 	{
+		m_pMatWorldViewProjVariable->Release();
 		m_pTechnique->Release();
 		if(m_pEffect) // safety check
 			m_pEffect->Release();
@@ -26,6 +33,11 @@ namespace dae
 	ID3DX11EffectTechnique* Effect::GetTechniquePtr() const
 	{
 		return m_pTechnique;
+	}
+
+	void Effect::UpdateWorldViewProjectionMatrix(const float* matrix)
+	{
+		m_pMatWorldViewProjVariable->SetMatrix(matrix);
 	}
 
 	ID3DX11Effect* Effect::LoadEffect(ID3D11Device* pDevice, const std::wstring& assetFile)

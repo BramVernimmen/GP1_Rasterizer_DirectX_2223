@@ -1,5 +1,5 @@
 #pragma once
-
+#include "Camera.h"
 
 
 
@@ -30,6 +30,8 @@ namespace dae
 		int m_Width{};
 		int m_Height{};
 
+		float m_AspectRatio{};
+
 		bool m_IsInitialized{ false };
 
 		//DIRECTX
@@ -44,6 +46,9 @@ namespace dae
 
 
 		Mesh* m_pMesh;
+
+
+		Camera m_Camera{};
 
 	};
 }

@@ -25,6 +25,8 @@ namespace dae
 		Mesh& operator=(Mesh&& other) = delete;
 
 		void Render(ID3D11DeviceContext* pDeviceContext) const;
+		void UpdateWorldViewProjectionMatrix(const Matrix& newMatrix) const;
+
 	private:
 		Effect* m_pEffect{};
 		ID3D11InputLayout* m_pInputLayout{};

@@ -16,9 +16,14 @@ namespace dae
 		ID3DX11Effect* GetEffectPtr() const;
 		ID3DX11EffectTechnique* GetTechniquePtr() const;
 
+		void UpdateWorldViewProjectionMatrix(const float* matrix);
+
 	private:
 		ID3DX11Effect* m_pEffect{};
 		ID3DX11EffectTechnique* m_pTechnique{};
+
+
+		ID3DX11EffectMatrixVariable* m_pMatWorldViewProjVariable{};
 
 		static ID3DX11Effect* LoadEffect(ID3D11Device* pDevice, const std::wstring& assetFile);
 	};
