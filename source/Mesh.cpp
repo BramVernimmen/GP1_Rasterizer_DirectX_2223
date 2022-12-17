@@ -1,14 +1,21 @@
 #include "pch.h"
 #include "Mesh.h"
 #include "Effect.h"
+#include "Texture.h"
+#include "Matrix.h"
 
 namespace dae
 {
 	Mesh::Mesh(ID3D11Device* pDevice, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices)
 		: m_pEffect{new Effect(pDevice, L"Resources/PosCol3D.fx")}
 	{
+		//m_pTexture = Texture::LoadFromFile(pDevice, "Resources/uv_grid_2.png");
+		m_pTexture = Texture::LoadFromFile(pDevice, "Resources/vehicle_diffuse.png");
+		m_pEffect->SetDiffuseMap(m_pTexture);
+
+
 		//Create Vertex Layout
-		static constexpr uint32_t numElements{ 2 };
+		static constexpr uint32_t numElements{ 3 };
 		D3D11_INPUT_ELEMENT_DESC vertexDesc[numElements]{};
 		
 		vertexDesc[0].SemanticName = "POSITION";
@@ -20,6 +27,11 @@ namespace dae
 		vertexDesc[1].Format = DXGI_FORMAT_R32G32B32_FLOAT;
 		vertexDesc[1].AlignedByteOffset = 12;
 		vertexDesc[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+
+		vertexDesc[2].SemanticName = "TEXCOORD";
+		vertexDesc[2].Format = DXGI_FORMAT_R32G32_FLOAT;
+		vertexDesc[2].AlignedByteOffset = 24;
+		vertexDesc[2].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
 
 		//Create Input Layout
 		D3DX11_PASS_DESC passDesc{};
@@ -74,7 +86,13 @@ namespace dae
 			m_pVertexBuffer->Release();
 		if (m_pInputLayout)
 			m_pInputLayout->Release();
+		delete m_pTexture;
 		delete m_pEffect;
+	}
+
+	void Mesh::Update(const Timer* pTimer)
+	{
+		m_WorldMatrix *= Matrix::CreateRotationY(m_RotationSpeed * pTimer->GetElapsed());
 	}
 
 	void Mesh::Render(ID3D11DeviceContext* pDeviceContext) const
@@ -106,9 +124,23 @@ namespace dae
 	void Mesh::UpdateWorldViewProjectionMatrix(const Matrix& newMatrix) const
 	{
 		// TODO ; don't forget mesh personal matrix (for translate/rotate)
-
+		Matrix fullMatrix = m_WorldMatrix * newMatrix;
 		
 
-		m_pEffect->UpdateWorldViewProjectionMatrix(reinterpret_cast<const float*>(&newMatrix));
+		m_pEffect->UpdateWorldViewProjectionMatrix(reinterpret_cast<const float*>(&fullMatrix));
+	}
+
+	void Mesh::UpdateSamplerState(ID3D11SamplerState* pNewSamplerState)
+	{
+		// temporarily store the Sampler Variable from Effect
+		ID3DX11EffectSamplerVariable* pSamplerStateVariable{ m_pEffect->GetEffectPtr()->GetVariableByName("gSamplerState")->AsSampler() };
+		// check if valid
+		if (!pSamplerStateVariable->IsValid())
+			std::wcout << L"pSamplerStateVariable not valid\n";
+
+		HRESULT result = pSamplerStateVariable->SetSampler(0, pNewSamplerState);
+		if (FAILED(result))
+			std::wcout << L"pNewSamplerState not correct  (in Mesh class)\n";
+
 	}
 }

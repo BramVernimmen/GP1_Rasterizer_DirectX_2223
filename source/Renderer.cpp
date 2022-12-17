@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Renderer.h"
 #include "Mesh.h"
+#include "Utils.h"
 
 namespace dae {
 
@@ -26,7 +27,8 @@ namespace dae {
 		}
 
 
-		m_Camera.Initialize(45.f, { 0.0f, 0.0f, -10.0f }, m_AspectRatio);
+		//m_Camera.Initialize(45.f, { 0.0f, 0.0f, -10.0f }, m_AspectRatio);
+		m_Camera.Initialize(45.f, { 0.0f, 0.0f, -50.0f }, m_AspectRatio);
 
 
 
@@ -38,20 +40,53 @@ namespace dae {
 		//	{{-0.5f, -0.5f, 0.5f},	{0.f, 1.f, 0.f}},
 		//};
 		
-		// pos in WORLD
-		std::vector<Vertex> vertices{
-			{{0.0f, 3.f, 2.f},	{1.f, 0.f, 0.f}},
-			{{3.f, -3.f, 2.f},	{0.f, 0.f, 1.f}},
-			{{-3.f, -3.f, 2.f},	{0.f, 1.f, 0.f}},
-		};
+		// pos in WORLD -- Triangle
+		//std::vector<Vertex> vertices{
+		//	{{0.0f, 3.f, 2.f},	{1.f, 0.f, 0.f}},
+		//	{{3.f, -3.f, 2.f},	{0.f, 0.f, 1.f}},
+		//	{{-3.f, -3.f, 2.f},	{0.f, 1.f, 0.f}},
+		//};
 
-		std::vector<uint32_t> indices{ 0,1,2 };
+		//std::vector<Vertex> vertices{
+		//	{
+		//		Vertex{{-3, 3, -2},		{1,1,1},	{0,0}},
+		//		Vertex{{0,3,-2},		{1,1,1},	{0.5f, 0}},
+		//		Vertex{{3,3,-2},		{1,1,1},	{1,0}},
+		//		Vertex{{-3, 0, -2},		{1,1,1},	{0, 0.5f}},
+		//		Vertex{{0,0,-2},		{1,1,1},	{0.5f, 0.5f}},
+		//		Vertex{{3,0,-2},		{1,1,1},	{1, 0.5f}},
+		//		Vertex{{-3,-3,-2},		{1,1,1},	{0,1}},
+		//		Vertex{{0,-3,-2},		{1,1,1},	{0.5f, 1}},
+		//		Vertex{{3,-3,-2},		{1,1,1},	{1,1}}
+		//	}
+		//};
+
+
+
+		//std::vector<uint32_t> indices{ 0,1,2 };
+		//std::vector<uint32_t> indices{ 
+		//		3,0,1,		1,4,3,		4,1,2,
+		//		2,5,4,		6,3,4,		4,7,6,
+		//		7,4,5,		5,8,7 
+		//};
+
+		std::vector<Vertex> vertices{};
+		std::vector<uint32_t> indices{};
+
+		if (Utils::ParseOBJ("Resources/vehicle.obj", vertices, indices) == false)
+			std::wcout << L"ParseOBJ FAILED\n";
 
 		m_pMesh = new Mesh(m_pDevice, vertices, indices);
+
+
+		//CreateNewSamplerState(D3D11_FILTER_MIN_MAG_MIP_POINT);
+		ToggleSamplerState(); // -> this will print the current state
 	}
 
 	Renderer::~Renderer()
 	{
+		m_pSamplerState->Release();
+
 		delete m_pMesh;
 		m_pMesh = nullptr;
 
@@ -73,6 +108,7 @@ namespace dae {
 	void Renderer::Update(const Timer* pTimer)
 	{
 		m_Camera.Update(pTimer);
+		m_pMesh->Update(pTimer);
 		m_pMesh->UpdateWorldViewProjectionMatrix(m_Camera.GetViewMatrix() * m_Camera.GetProjectionMatrix());
 	}
 
@@ -100,8 +136,6 @@ namespace dae {
 
 
 	}
-
-
 
 
 
@@ -230,5 +264,53 @@ namespace dae {
 
 		return result;
 		//return S_FALSE;
+	}
+
+	void Renderer::ToggleSamplerState()
+	{
+		m_CurrentSamplerState = SamplerState((static_cast<int>(m_CurrentSamplerState) + 1) % 3);
+
+		switch (m_CurrentSamplerState)
+		{
+		case dae::Renderer::SamplerState::Point:
+			CreateNewSamplerState(D3D11_FILTER_MIN_MAG_MIP_POINT);
+			std::wcout << L"SAMPLER STATE: POINT\n";
+			break;
+		case dae::Renderer::SamplerState::Linear:
+			CreateNewSamplerState(D3D11_FILTER_MIN_MAG_MIP_LINEAR);
+			std::wcout << L"SAMPLER STATE: LINEAR\n";
+			break;
+		case dae::Renderer::SamplerState::Anisotropic:
+			CreateNewSamplerState(D3D11_FILTER_ANISOTROPIC);
+			std::wcout << L"SAMPLER STATE: ANISOTROPIC\n";
+			break;
+		}
+	}
+
+
+
+	void Renderer::CreateNewSamplerState(D3D11_FILTER newFiler)
+	{
+		// release the old one
+		if (m_pSamplerState)
+			m_pSamplerState->Release();
+
+		D3D11_SAMPLER_DESC newSamplerDesc{}; // info -> https://learn.microsoft.com/en-us/windows/win32/api/d3d11/ns-d3d11-d3d11_sampler_desc
+		newSamplerDesc.Filter = newFiler;
+		newSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+		newSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+		newSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+		newSamplerDesc.MinLOD = (-FLT_MAX);
+		newSamplerDesc.MaxLOD = FLT_MAX;
+		newSamplerDesc.MipLODBias = 0.0f;
+		newSamplerDesc.MaxAnisotropy = 1;
+		newSamplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+		//newSamplerDesc.BorderColor = float4(1.0f, 1.0f, 1.0f, 1.0f);
+
+		HRESULT result = m_pDevice->CreateSamplerState(&newSamplerDesc, &m_pSamplerState);
+		if (FAILED(result))
+			std::wcout << L"m_pSamplerState not correct\n";
+
+		m_pMesh->UpdateSamplerState(m_pSamplerState);
 	}
 }

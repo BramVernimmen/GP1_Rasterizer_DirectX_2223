@@ -28,7 +28,7 @@ int main(int argc, char* args[])
 	const uint32_t height = 480;
 
 	SDL_Window* pWindow = SDL_CreateWindow(
-		"DirectX - ***Insert Name/Class***",
+		"DirectX - Vernimmen Bram, 2DAE15",
 		SDL_WINDOWPOS_UNDEFINED,
 		SDL_WINDOWPOS_UNDEFINED,
 		width, height, 0);
@@ -58,6 +58,8 @@ int main(int argc, char* args[])
 			case SDL_KEYUP:
 				//Test for a key
 				//if (e.key.keysym.scancode == SDL_SCANCODE_X)
+				if (e.key.keysym.scancode == SDL_SCANCODE_F2)
+					pRenderer->ToggleSamplerState();
 				break;
 			default: ;
 			}

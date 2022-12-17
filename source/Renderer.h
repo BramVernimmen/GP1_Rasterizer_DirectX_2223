@@ -24,7 +24,16 @@ namespace dae
 		void Update(const Timer* pTimer);
 		void Render() const;
 
+		void ToggleSamplerState();
+
 	private:
+		enum class SamplerState
+		{
+			Point = 0,
+			Linear = 1,
+			Anisotropic = 2
+		};
+
 		SDL_Window* m_pWindow{};
 
 		int m_Width{};
@@ -33,6 +42,8 @@ namespace dae
 		float m_AspectRatio{};
 
 		bool m_IsInitialized{ false };
+
+		
 
 		//DIRECTX
 		HRESULT InitializeDirectX();
@@ -43,12 +54,18 @@ namespace dae
 		ID3D11DepthStencilView* m_pDepthStencilView{};
 		ID3D11Resource* m_pRenderTargetBuffer{};
 		ID3D11RenderTargetView* m_pRenderTargetView{};
+		ID3D11SamplerState* m_pSamplerState{};
+
+		SamplerState m_CurrentSamplerState{ SamplerState::Anisotropic };
 
 
 		Mesh* m_pMesh;
 
 
 		Camera m_Camera{};
+
+		void CreateNewSamplerState(D3D11_FILTER newFiler);
+
 
 	};
 }

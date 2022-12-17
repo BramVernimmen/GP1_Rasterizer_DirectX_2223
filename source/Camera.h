@@ -97,7 +97,7 @@ namespace dae
 			//Camera Update Logic
 			//...
 			float movementSpeed{ 25.f };
-			float rotationSpeed{ 150.f * TO_RADIANS };
+			float rotationSpeed{ 300.f * TO_RADIANS };
 			//Keyboard Input
 			const uint8_t* pKeyboardState = SDL_GetKeyboardState(nullptr);
 
