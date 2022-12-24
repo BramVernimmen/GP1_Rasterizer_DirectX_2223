@@ -274,15 +274,15 @@ namespace dae {
 		{
 		case dae::Renderer::SamplerState::Point:
 			CreateNewSamplerState(D3D11_FILTER_MIN_MAG_MIP_POINT);
-			std::wcout << L"SAMPLER STATE: POINT\n";
+			std::wcout << "\033[33m" << L"SAMPLER STATE: POINT\n" << "\033[0m";
 			break;
 		case dae::Renderer::SamplerState::Linear:
 			CreateNewSamplerState(D3D11_FILTER_MIN_MAG_MIP_LINEAR);
-			std::wcout << L"SAMPLER STATE: LINEAR\n";
+			std::wcout << "\033[31m" << L"SAMPLER STATE: LINEAR\n" << "\033[0m";
 			break;
 		case dae::Renderer::SamplerState::Anisotropic:
 			CreateNewSamplerState(D3D11_FILTER_ANISOTROPIC);
-			std::wcout << L"SAMPLER STATE: ANISOTROPIC\n";
+			std::wcout << "\033[32m" << L"SAMPLER STATE: ANISOTROPIC\n" << "\033[0m";
 			break;
 		}
 	}
