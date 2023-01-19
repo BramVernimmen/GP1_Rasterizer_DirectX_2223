@@ -60,7 +60,7 @@ namespace dae
 
 
 		Mesh* m_pMesh;
-
+		std::vector<Mesh*> m_pMeshes;
 
 		Camera m_Camera{};
 

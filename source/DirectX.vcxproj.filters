@@ -51,6 +51,12 @@
     <ClInclude Include="Utils.h">
       <Filter>Misc</Filter>
     </ClInclude>
+    <ClInclude Include="EffectTransparent.h">
+      <Filter>Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="EffectShading.h">
+      <Filter>Misc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -78,6 +84,12 @@
       <Filter>Misc</Filter>
     </ClCompile>
     <ClCompile Include="Texture.cpp">
+      <Filter>Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="EffectTransparent.cpp">
+      <Filter>Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="EffectShading.cpp">
       <Filter>Misc</Filter>
     </ClCompile>
   </ItemGroup>

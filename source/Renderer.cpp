@@ -2,6 +2,9 @@
 #include "Renderer.h"
 #include "Mesh.h"
 #include "Utils.h"
+#include "EffectTransparent.h"
+#include "EffectShading.h"
+#include "Texture.h"
 
 namespace dae {
 
@@ -76,7 +79,46 @@ namespace dae {
 		if (Utils::ParseOBJ("Resources/vehicle.obj", vertices, indices) == false)
 			std::wcout << L"ParseOBJ FAILED\n";
 
-		m_pMesh = new Mesh(m_pDevice, vertices, indices);
+		//m_pMesh = new Mesh(m_pDevice, vertices, indices);
+
+		EffectShading* pEffectShading{ new EffectShading(m_pDevice, L"Resources/PosCol3D.fx") };
+
+
+		Texture* pDiffuseTexture = Texture::LoadFromFile(m_pDevice, "Resources/vehicle_diffuse.png");
+		pEffectShading->SetDiffuseMap(pDiffuseTexture);
+
+		Texture* pNormalTexture = Texture::LoadFromFile(m_pDevice, "Resources/vehicle_normal.png");
+		pEffectShading->SetNormalMap(pNormalTexture);
+
+		Texture* pSpecularTexture = Texture::LoadFromFile(m_pDevice, "Resources/vehicle_specular.png");
+		pEffectShading->SetSpecularMap(pSpecularTexture);
+
+		Texture* pGlossinessTexture = Texture::LoadFromFile(m_pDevice, "Resources/vehicle_gloss.png");
+		pEffectShading->SetGlossinessMap(pGlossinessTexture);
+
+		m_pMeshes.push_back(new Mesh(m_pDevice, vertices, indices, pEffectShading));
+
+		delete pDiffuseTexture;
+		delete pNormalTexture;
+		delete pSpecularTexture;
+		delete pGlossinessTexture;
+
+
+		
+
+
+		EffectTransparent* pEffectTransparent{ new EffectTransparent(m_pDevice, L"Resources/Transparency3D.fx") };
+		Texture* pDiffuseTextureFire = Texture::LoadFromFile(m_pDevice, "Resources/fireFX_diffuse.png");
+		pEffectTransparent->SetDiffuseMap(pDiffuseTextureFire);
+
+
+		vertices.clear();
+		indices.clear();
+		if (Utils::ParseOBJ("Resources/fireFX.obj", vertices, indices) == false)
+			std::wcout << L"ParseOBJ FAILED\n";
+		m_pMeshes.push_back(new Mesh(m_pDevice, vertices, indices, pEffectTransparent));
+
+		delete pDiffuseTextureFire;
 
 
 		//CreateNewSamplerState(D3D11_FILTER_MIN_MAG_MIP_POINT);
@@ -89,6 +131,12 @@ namespace dae {
 
 		delete m_pMesh;
 		m_pMesh = nullptr;
+
+		for (Mesh* currMesh : m_pMeshes)
+		{
+			delete currMesh;
+			currMesh = nullptr;
+		}
 
 		m_pRenderTargetView->Release();
 		m_pRenderTargetBuffer->Release();
@@ -108,8 +156,13 @@ namespace dae {
 	void Renderer::Update(const Timer* pTimer)
 	{
 		m_Camera.Update(pTimer);
-		m_pMesh->Update(pTimer);
-		m_pMesh->UpdateWorldViewProjectionMatrix(m_Camera.GetViewMatrix() * m_Camera.GetProjectionMatrix());
+		//m_pMesh->Update(pTimer);
+		for (Mesh* currMesh : m_pMeshes)
+		{
+			currMesh->Update(pTimer);
+			currMesh->UpdateWorldViewProjectionMatrix(m_Camera.GetViewMatrix() * m_Camera.GetProjectionMatrix(), m_Camera.GetViewInverseMatrix());
+		}
+		//m_pMesh->UpdateWorldViewProjectionMatrix(m_Camera.GetViewMatrix() * m_Camera.GetProjectionMatrix(), m_Camera.GetViewInverseMatrix());
 	}
 
 
@@ -130,7 +183,12 @@ namespace dae {
 
 
 		//3. PRESENT BACKBUFFER (SWAP)
-		m_pMesh->Render(m_pDeviceContext);
+		//m_pMesh->Render(m_pDeviceContext);
+
+		for (Mesh* currMesh : m_pMeshes)
+		{
+			currMesh->Render(m_pDeviceContext);
+		}
 		m_pSwapChain->Present(0, 0);
 
 
@@ -311,6 +369,11 @@ namespace dae {
 		if (FAILED(result))
 			std::wcout << L"m_pSamplerState not correct\n";
 
-		m_pMesh->UpdateSamplerState(m_pSamplerState);
+		//m_pMesh->UpdateSamplerState(m_pSamplerState);
+
+		for (Mesh* currMesh : m_pMeshes)
+		{
+			currMesh->UpdateSamplerState(m_pSamplerState);
+		}
 	}
 }

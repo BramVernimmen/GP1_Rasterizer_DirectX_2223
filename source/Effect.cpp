@@ -16,18 +16,10 @@ namespace dae
 		if(!m_pMatWorldViewProjVariable->IsValid())
 			std::wcout << L"m_pMatWorldViewProjVariable not valid\n";
 
-
-		m_pDiffuseMapVariable = m_pEffect->GetVariableByName("gDiffuseMap")->AsShaderResource();
-		if(!m_pDiffuseMapVariable->IsValid())
-			std::wcout << L"m_pDiffuseMapVariable not valid\n";
-
-
-
 	}
 
 	Effect::~Effect()
 	{
-		m_pDiffuseMapVariable->Release();
 		m_pMatWorldViewProjVariable->Release();
 		m_pTechnique->Release();
 		if(m_pEffect) // safety check
@@ -49,11 +41,14 @@ namespace dae
 		m_pMatWorldViewProjVariable->SetMatrix(matrix);
 	}
 
-	void Effect::SetDiffuseMap(Texture* pDiffuseTexture)
+	void Effect::UpdateWorldMatrix(const float* matrix)
 	{
-		if (m_pDiffuseMapVariable)
-			m_pDiffuseMapVariable->SetResource(pDiffuseTexture->GetSRV());
 	}
+
+	void Effect::UpdateViewInverseMatrix(const float* matrix)
+	{
+	}
+	
 
 	ID3DX11Effect* Effect::LoadEffect(ID3D11Device* pDevice, const std::wstring& assetFile)
 	{

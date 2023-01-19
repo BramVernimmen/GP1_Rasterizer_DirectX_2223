@@ -6,16 +6,13 @@
 
 namespace dae
 {
-	Mesh::Mesh(ID3D11Device* pDevice, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices)
-		: m_pEffect{new Effect(pDevice, L"Resources/PosCol3D.fx")}
+	Mesh::Mesh(ID3D11Device* pDevice, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, Effect* pEffect)
+		: m_pEffect{pEffect}
 	{
 		//m_pTexture = Texture::LoadFromFile(pDevice, "Resources/uv_grid_2.png");
-		m_pTexture = Texture::LoadFromFile(pDevice, "Resources/vehicle_diffuse.png");
-		m_pEffect->SetDiffuseMap(m_pTexture);
-
 
 		//Create Vertex Layout
-		static constexpr uint32_t numElements{ 3 };
+		static constexpr uint32_t numElements{ 5 };
 		D3D11_INPUT_ELEMENT_DESC vertexDesc[numElements]{};
 		
 		vertexDesc[0].SemanticName = "POSITION";
@@ -32,6 +29,16 @@ namespace dae
 		vertexDesc[2].Format = DXGI_FORMAT_R32G32_FLOAT;
 		vertexDesc[2].AlignedByteOffset = 24;
 		vertexDesc[2].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+
+		vertexDesc[3].SemanticName = "NORMAL";
+		vertexDesc[3].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+		vertexDesc[3].AlignedByteOffset = 32;
+		vertexDesc[3].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+
+		vertexDesc[4].SemanticName = "TANGENT";
+		vertexDesc[4].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+		vertexDesc[4].AlignedByteOffset = 44;
+		vertexDesc[4].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
 
 		//Create Input Layout
 		D3DX11_PASS_DESC passDesc{};
@@ -86,7 +93,10 @@ namespace dae
 			m_pVertexBuffer->Release();
 		if (m_pInputLayout)
 			m_pInputLayout->Release();
-		delete m_pTexture;
+		delete m_pDiffuseTexture;
+		delete m_pNormalTexture;
+		delete m_pSpecularTexture;
+		delete m_pGlossinessTexture;
 		delete m_pEffect;
 	}
 
@@ -121,13 +131,15 @@ namespace dae
 		}
 
 	}
-	void Mesh::UpdateWorldViewProjectionMatrix(const Matrix& newMatrix) const
+	void Mesh::UpdateWorldViewProjectionMatrix(const Matrix& newMatrix, const Matrix& viewInverseMatrix) const
 	{
 		// TODO ; don't forget mesh personal matrix (for translate/rotate)
-		Matrix fullMatrix = m_WorldMatrix * newMatrix;
-		
+		m_pEffect->UpdateWorldMatrix(reinterpret_cast<const float*>(&m_WorldMatrix));
+		m_pEffect->UpdateViewInverseMatrix(reinterpret_cast<const float*>(&viewInverseMatrix));
 
+		Matrix fullMatrix = m_WorldMatrix * newMatrix;
 		m_pEffect->UpdateWorldViewProjectionMatrix(reinterpret_cast<const float*>(&fullMatrix));
+		
 	}
 
 	void Mesh::UpdateSamplerState(ID3D11SamplerState* pNewSamplerState)

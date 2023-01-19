@@ -4,11 +4,11 @@ namespace dae
 {
 	class Texture;
 
-	class Effect final
+	class Effect
 	{
 	public:
 		Effect(ID3D11Device* pDevice, const std::wstring& assetFile);
-		~Effect();
+		virtual ~Effect();
 
 		Effect(const Effect& other) = delete;
 		Effect& operator=(const Effect& other) = delete;
@@ -20,16 +20,17 @@ namespace dae
 
 		void UpdateWorldViewProjectionMatrix(const float* matrix);
 
-		void SetDiffuseMap(Texture* pDiffuseTexture);
+		
+		virtual void UpdateWorldMatrix(const float* matrix);
+		virtual void UpdateViewInverseMatrix(const float* matrix);
 
-	private:
+
+	protected:
 		ID3DX11Effect* m_pEffect{};
-		ID3DX11EffectTechnique* m_pTechnique{};
-
-
 		ID3DX11EffectMatrixVariable* m_pMatWorldViewProjVariable{};
 
-		ID3DX11EffectShaderResourceVariable* m_pDiffuseMapVariable{};
+	private:
+		ID3DX11EffectTechnique* m_pTechnique{};
 
 		static ID3DX11Effect* LoadEffect(ID3D11Device* pDevice, const std::wstring& assetFile);
 	};

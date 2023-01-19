@@ -54,6 +54,11 @@ namespace dae
 			return projectionMatrix;
 		}
 
+		Matrix GetViewInverseMatrix()
+		{
+			return invViewMatrix;
+		}
+
 
 
 		void Initialize(float _fovAngle = 90.f, Vector3 _origin = {0.f,0.f,0.f}, float _aspectRatio = 1.7f, float _nearPlane = 0.1f, float _farPlane = 100.f)
