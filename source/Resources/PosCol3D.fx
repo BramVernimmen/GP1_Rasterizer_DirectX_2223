@@ -153,7 +153,7 @@ float4 PS(VS_OUTPUT input) : SV_TARGET
 	float exponent = gGlossinessMap.Sample(gSamplerState, input.UV).r * gShininess;
 	float3 viewDirection = normalize(input.WorldPosition.xyz - gViewInverseMatrix[3].xyz);
 
-	float4 specular = CalculateSpecularPhong(gSpecularMap.Sample(gSamplerState, input.UV), ks, exponent, gLightDirection, viewDirection, sampledNormal);
+	float4 specular = CalculateSpecularPhong(gSpecularMap.Sample(gSamplerState, input.UV), ks, exponent, gLightDirection, -viewDirection, sampledNormal);
 
 	return (diffuse * gLightIntensity + specular + float4(0.025f, 0.025f, 0.025f, 1.0f)) * observedArea;
 

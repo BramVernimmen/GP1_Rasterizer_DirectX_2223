@@ -236,7 +236,7 @@ namespace dae {
 		swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 		swapChainDesc.BufferCount = 1;
 		swapChainDesc.Windowed = true;
-		swapChainDesc.SwapEffect - DXGI_SWAP_EFFECT_DISCARD;
+		swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 		swapChainDesc.Flags = 0;
 
 		//Get the handle (HWND) from the SDL Backbuffer
